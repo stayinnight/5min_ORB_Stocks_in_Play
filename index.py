@@ -235,11 +235,11 @@ def loop():
                 show(f'获取{quote.symbol}的K线失败:{e}')
                 continue  
 
-        if quote.last_done > up + up * Decimal(0.00015) and quote.open < up + up * Decimal(0.00015) and quote.last_done > vwap:     #max(quote.last_done * Decimal(0.00015), Decimal(0.1 * atr))
+        if quote.last_done > up + up * Decimal(0.0002) and quote.open < up + up * Decimal(0.0002) and quote.last_done > vwap:     #max(quote.last_done * Decimal(0.00015), Decimal(0.1 * atr))
             if quote.symbol in s.longStockList:
                 continue
             isBuy = True
-        elif quote.last_done < down - down * Decimal(0.00015) and quote.open > down - down * Decimal(0.00015) and quote.last_done < vwap:     #max(quote.last_done * Decimal(0.00015), Decimal(0.1 * atr))
+        elif quote.last_done < down - down * Decimal(0.0002) and quote.open > down - down * Decimal(0.0002) and quote.last_done < vwap:     #max(quote.last_done * Decimal(0.00015), Decimal(0.1 * atr))
             if quote.symbol in s.shortStockList:
                 continue
             isBuy = False
