@@ -235,13 +235,15 @@ def loop():
                 show(f'获取{quote.symbol}的K线失败:{e}')
                 continue  
             
-        data1 = s.quoteContext.history_candlesticks_by_date(quote.symbol, s.periodDict[1], AdjustType.ForwardAdjust, forward = False, count = 1)
+        data1 = s.quoteContext.history_candlesticks_by_offset(quote.symbol, s.periodDict[1], AdjustType.ForwardAdjust, forward = False, count = 3)
         time.sleep(0.3)
-        if data1[0].close > up + up * Decimal(0.0002) and data1[0].open < up + up * Decimal(0.0002) and data1[0].close > vwap: 
+        if len(data1) < 3:
+            continue
+        if data1[-2].close > up + up * Decimal(0.0002) and data1[-3].close < up + up * Decimal(0.0002) and data1[-2].close > vwap: 
             if quote.symbol in s.longStockList:
                 continue
             isBuy = True
-        elif data1[0].close < down - down * Decimal(0.0002) and data1[0].open > down - down * Decimal(0.0002) and data1[0].close < vwap: 
+        elif data1[-2].close < down - down * Decimal(0.0002) and data1[-3].close > down - down * Decimal(0.0002) and data1[-2].close < vwap: 
             if quote.symbol in s.shortStockList:
                 continue
             isBuy = False
