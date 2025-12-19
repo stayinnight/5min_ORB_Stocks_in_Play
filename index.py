@@ -137,10 +137,10 @@ def loop():
         vwap = quote.turnover / quote.volume
 
         hold = holdDict.get(quote.symbol, 0)
-        if hold != 0:
+        if hold != 0:    
             if quote.symbol in s.openedStockList:
                 s.openedStockList.remove(quote.symbol)
-            if hold > 0:                
+            if hold > 0:             
                 s.maxPriceDict[quote.symbol] = max(quote.last_done, s.maxPriceDict.get(quote.symbol, 0))
                 isClose = False
                 if s.isEnd:                
@@ -169,7 +169,7 @@ def loop():
                         s.maxPriceDict.pop(quote.symbol, None)
                     except Exception as e:
                         show(f'股票[{quote.symbol}]卖出失败:{e}')
-            else:              
+            else:            
                 s.maxPriceDict[quote.symbol] = min(quote.last_done, s.maxPriceDict.get(quote.symbol, 99999999))
                 isClose = False
                 if s.isEnd:                
@@ -206,8 +206,6 @@ def loop():
             continue
         if datetime.now() >= endTime - timedelta(minutes=5):
             continue
-        # if datetime.now().minute % 5 > 0 or datetime.now().second > 10:
-        #     continue 
         if quote.symbol in s.infoDict.keys():
             info = s.infoDict[quote.symbol]
             up, down, atr = info[0], info[1], info[2]
@@ -231,6 +229,7 @@ def loop():
                 up = data5[0].high
                 down = data5[0].low
                 s.infoDict[quote.symbol] = (up, down, atr)
+                show(f'{quote.symbol} 上轨:{up} 下轨:{down}')
             except Exception as e:
                 show(f'获取{quote.symbol}的K线失败:{e}')
                 continue  
@@ -239,11 +238,11 @@ def loop():
         time.sleep(0.3)
         if len(data1) < 3:
             continue
-        if data1[-2].close > up + up * Decimal(0.0002) and data1[-3].close < up + up * Decimal(0.0002) and data1[-2].close > vwap: 
+        if data1[-2].close > up + up * Decimal(0.002) and data1[-3].close < up + up * Decimal(0.002) and data1[-2].close > vwap: 
             if quote.symbol in s.longStockList:
                 continue
             isBuy = True
-        elif data1[-2].close < down - down * Decimal(0.0002) and data1[-3].close > down - down * Decimal(0.0002) and data1[-2].close < vwap: 
+        elif data1[-2].close < down - down * Decimal(0.002) and data1[-3].close > down - down * Decimal(0.002) and data1[-2].close < vwap: 
             if quote.symbol in s.shortStockList:
                 continue
             isBuy = False
