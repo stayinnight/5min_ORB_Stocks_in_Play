@@ -1,12 +1,25 @@
 ######################  参数设置区开始  ######################
 t = {
-'股票池' : ['COIN', 'APP', 'RKLB', 'ORCL', 'IONQ', 'FUTU', 'META', 'HOOD', 'TSM', 'MSTR', 'BE', 'HIMS', 'MP', 'TSLA', 'BABA', 'INTC', 'AMD', 'PDD', 'MRVL', 'DELL', 'SMCI', 'NVDA', 'CRDO', 'MU', 'PLTR', 'NFLX', 'LLY', 'LULU', 'CIEN', 'SATS', 'LITE', 'WDC', 'RIVN'],
+'股票池' : [
+    'COIN', 'APP', 'RKLB', 
+    'ORCL', 'IONQ', 'FUTU', 
+    'META', 'HOOD', 'TSM', 
+    'MSTR', 'BE', 'HIMS', 
+    'MP', 'TSLA', 'BABA', 
+    'INTC', 'AMD', 'PDD', 
+    'MRVL', 'DELL', 'SMCI', 
+    'NVDA', 'CRDO', 'MU', 
+    'PLTR', 'NFLX', 'LLY', 
+    'LULU', 'CIEN', 'SATS', 
+    'LITE', 'WDC', 'RIVN',
+    'BIDU', 'NOW', 'COHR'
+    ],
 '开盘时间' : '2230',   #北京时间 
 '收盘时间' : '0500',   #北京时间 
 'ATR周期' : 14,
 '止损ATR系数' : 0.2,
-'每单仓位(%)' : 15,
-'每日最大亏损限额(%)' : 3,
+'每单仓位(%)' : 20,
+'每日最大亏损限额(%)' : 2,
 }
 ######################  参数设置区结束  ######################
 
@@ -84,7 +97,8 @@ def loop():
     else:
         startTime = (datetime.now() - timedelta(days=1)).replace(hour=int(t['开盘时间'][:2]), minute=int(t['开盘时间'][2:]), second=0, microsecond=0)
         endTime = datetime.now().replace(hour=int(t['收盘时间'][:2]), minute=int(t['收盘时间'][2:]), second=0, microsecond=0)
-    if datetime.now() < startTime + timedelta(minutes=10) or datetime.now() >= endTime:
+    if datetime.now() < startTime + timedelta(minutes=6) or datetime.now() >= endTime:
+    # if datetime.now() < startTime + timedelta(minutes=10) or datetime.now() >= endTime: // 可以控制开盘后多少分钟开始交易
         s.cap = 0
         s.isEnd = False
         s.infoDict = {}
@@ -123,10 +137,10 @@ def loop():
         vwap = quote.turnover / quote.volume
 
         hold = holdDict.get(quote.symbol, 0)
-        if hold != 0:
+        if hold != 0:    
             if quote.symbol in s.openedStockList:
                 s.openedStockList.remove(quote.symbol)
-            if hold > 0:                
+            if hold > 0:             
                 s.maxPriceDict[quote.symbol] = max(quote.last_done, s.maxPriceDict.get(quote.symbol, 0))
                 isClose = False
                 if s.isEnd:                
@@ -155,7 +169,7 @@ def loop():
                         s.maxPriceDict.pop(quote.symbol, None)
                     except Exception as e:
                         show(f'股票[{quote.symbol}]卖出失败:{e}')
-            else:              
+            else:            
                 s.maxPriceDict[quote.symbol] = min(quote.last_done, s.maxPriceDict.get(quote.symbol, 99999999))
                 isClose = False
                 if s.isEnd:                
@@ -192,8 +206,6 @@ def loop():
             continue
         if datetime.now() >= endTime - timedelta(minutes=5):
             continue
-        # if datetime.now().minute % 5 > 0 or datetime.now().second > 10:
-        #     continue 
         if quote.symbol in s.infoDict.keys():
             info = s.infoDict[quote.symbol]
             up, down, atr = info[0], info[1], info[2]
@@ -217,15 +229,20 @@ def loop():
                 up = data5[0].high
                 down = data5[0].low
                 s.infoDict[quote.symbol] = (up, down, atr)
+                show(f'{quote.symbol} 上轨:{up} 下轨:{down}')
             except Exception as e:
                 show(f'获取{quote.symbol}的K线失败:{e}')
                 continue  
-
-        if quote.last_done > up + up * Decimal(0.00015) and quote.last_done > vwap:     #max(quote.last_done * Decimal(0.00015), Decimal(0.1 * atr))
+            
+        data1 = s.quoteContext.history_candlesticks_by_offset(quote.symbol, s.periodDict[1], AdjustType.ForwardAdjust, forward = False, count = 3)
+        time.sleep(0.3)
+        if len(data1) < 3:
+            continue
+        if data1[-2].close > up + up * Decimal(0.002) and data1[-3].close < up + up * Decimal(0.002) and data1[-2].close > vwap: 
             if quote.symbol in s.longStockList:
                 continue
             isBuy = True
-        elif quote.last_done < down - down * Decimal(0.00015) and quote.last_done < vwap:     #max(quote.last_done * Decimal(0.00015), Decimal(0.1 * atr))
+        elif data1[-2].close < down - down * Decimal(0.002) and data1[-3].close > down - down * Decimal(0.002) and data1[-2].close < vwap: 
             if quote.symbol in s.shortStockList:
                 continue
             isBuy = False
