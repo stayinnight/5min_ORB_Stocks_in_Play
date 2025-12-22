@@ -17,7 +17,7 @@ t = {
 '开盘时间' : '2230',   #北京时间 
 '收盘时间' : '0500',   #北京时间 
 'ATR周期' : 14,
-'止损ATR系数' : 0.2,
+'止损ATR系数' : 0.25,
 '每单仓位(%)' : 20,
 '每日最大亏损限额(%)' : 2,
 }
@@ -97,7 +97,7 @@ def loop():
     else:
         startTime = (datetime.now() - timedelta(days=1)).replace(hour=int(t['开盘时间'][:2]), minute=int(t['开盘时间'][2:]), second=0, microsecond=0)
         endTime = datetime.now().replace(hour=int(t['收盘时间'][:2]), minute=int(t['收盘时间'][2:]), second=0, microsecond=0)
-    if datetime.now() < startTime + timedelta(minutes=6) or datetime.now() >= endTime:
+    if datetime.now() < startTime + timedelta(minutes=10) or datetime.now() >= endTime:
     # if datetime.now() < startTime + timedelta(minutes=10) or datetime.now() >= endTime: // 可以控制开盘后多少分钟开始交易
         s.cap = 0
         s.isEnd = False
@@ -146,7 +146,7 @@ def loop():
                 if s.isEnd:                
                     show(f'达到最大亏损限额,股票[{quote.symbol}]清仓')
                     isClose = True
-                elif datetime.now() >= endTime - timedelta(minutes=5):              
+                elif datetime.now() >= endTime - timedelta(minutes=10):              
                     show(f'尾盘,股票[{quote.symbol}]清仓')
                     isClose = True
                 else:                    
@@ -175,7 +175,7 @@ def loop():
                 if s.isEnd:                
                     show(f'达到最大亏损限额,股票[{quote.symbol}]清仓')
                     isClose = True
-                elif datetime.now() >= endTime - timedelta(minutes=5):              
+                elif datetime.now() >= endTime - timedelta(minutes=10):              
                     show(f'尾盘,股票[{quote.symbol}]清仓')
                     isClose = True
                 else:                    
