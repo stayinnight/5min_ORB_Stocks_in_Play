@@ -26,13 +26,9 @@ t = {
 
 import os
 import time
-import math
 import talib
-import random
-import decimal
 import logging
 import numpy as np
-import pandas as pd
 from decimal import Decimal
 from threading import Thread
 from datetime import datetime, timedelta
